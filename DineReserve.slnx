@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DineReserve.API/DineReserve.API.csproj" />
+  <Project Path="DineReserve.Application/DineReserve.Application.csproj" />
+  <Project Path="DineReserve.Domain/DineReserve.Domain.csproj" />
+  <Project Path="DineReserve.Infrastructure/DineReserve.Infrastructure.csproj" />
+</Solution>
