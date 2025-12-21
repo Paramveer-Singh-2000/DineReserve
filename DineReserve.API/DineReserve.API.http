@@ -1,0 +1,6 @@
+@DineReserveAPI_HostAddress = http://localhost:5076
+
+GET {{DineReserveAPI_HostAddress}}/weatherforecast
+Accept: application/json
+
+###
