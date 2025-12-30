@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.0.1" />
@@ -14,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DineReserve.Application\DineReserve.Application.csproj" />
+    <ProjectReference Include="..\DineReserve.Infrastructure\DineReserve.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,11 @@
 @DineReserveAPI_HostAddress = http://localhost:5076
 
-GET {{DineReserveAPI_HostAddress}}/weatherforecast
+### Get all restaurants
+GET {{DineReserveAPI_HostAddress}}/api/restaurants
 Accept: application/json
 
 ###
+
+### Get restaurant by id
+GET {{DineReserveAPI_HostAddress}}/api/restaurants/1
+Accept: application/json
