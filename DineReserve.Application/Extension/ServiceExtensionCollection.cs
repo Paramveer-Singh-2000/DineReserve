@@ -1,5 +1,6 @@
 ﻿using DineReserve.Application.Restaurants;
 using DineReserve.Domain.Repositories;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,10 @@ namespace DineReserve.Application.Extension
     {
         public static void AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<IRestaurantService, RestaurantService>();
-            services.AddAutoMapper(typeof(ServiceExtensionCollection).Assembly);
+            var assembly = typeof(ServiceExtensionCollection).Assembly;
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
+            services.AddAutoMapper(assembly);
+            services.AddValidatorsFromAssembly(assembly);
         }
     }
 }
