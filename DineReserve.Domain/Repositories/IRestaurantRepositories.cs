@@ -10,5 +10,7 @@ namespace DineReserve.Domain.Repositories
         Task<IEnumerable<Restaurant>> GetAllAsync();
         Task<Restaurant?> GetRestaurantByIdAsync(int Id);
         Task<int> CreateRestaurantAsync(Restaurant restaurant);
+        Task DeleteRestaurantAsync(Restaurant restaurant);
+        Task SaveChanges();
     }
 }

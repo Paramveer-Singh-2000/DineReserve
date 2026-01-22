@@ -17,6 +17,12 @@ namespace DineReserve.Infrastructure.Repositories
             return restaurant.Id;
         }
 
+        public async Task DeleteRestaurantAsync(Restaurant restaurant)
+        {
+            dbContext.Remove(restaurant);
+            await dbContext.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<Restaurant>> GetAllAsync()
         {
             var restaurants = await dbContext.Restaurants.Include(x => x.Dishes).ToListAsync();
@@ -27,6 +33,11 @@ namespace DineReserve.Infrastructure.Repositories
         {
             var restaurant = await dbContext.Restaurants.Include(x => x.Dishes).FirstOrDefaultAsync(x => x .Id == Id);
             return restaurant;
+        }
+
+        public async Task SaveChanges()
+        {
+            await dbContext.SaveChangesAsync();
         }
     }
 }

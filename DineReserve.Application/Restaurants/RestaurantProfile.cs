@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using DineReserve.Application.Commands.CreateRestaurant;
+using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
+using DineReserve.Application.Restaurants.Commands.UpdateRestaurant;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Domain.Entities;
 using System;
@@ -12,6 +13,7 @@ namespace DineReserve.Application.Restaurants
     {
         public RestaurantProfile()
         {
+            CreateMap<UpdateRestaurantCommand, Restaurant>();
         CreateMap<CreateRestaurantCommand, Restaurant>().ForMember(d => d.Address, opt => opt.MapFrom(src => new Address
         {
             City = src.City,

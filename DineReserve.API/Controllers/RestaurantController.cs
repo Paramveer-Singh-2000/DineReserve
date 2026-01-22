@@ -1,11 +1,15 @@
-﻿using DineReserve.Application.Commands.CreateRestaurant;
+﻿using DineReserve.Application.Commands.DeleteRestaurant;
 using DineReserve.Application.Restaurants;
+using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
+using DineReserve.Application.Restaurants.Commands.DeleteRestaurant;
+using DineReserve.Application.Restaurants.Commands.UpdateRestaurant;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Application.Restaurants.Queries.GetAllRestaurant;
 using DineReserve.Application.Restaurants.Queries.GetRestaurantById;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 using System.Threading.Tasks;
 
 namespace DineReserve.API.Controllers
@@ -15,24 +19,39 @@ namespace DineReserve.API.Controllers
     public class RestaurantController(IMediator mediator) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetRestaurants()
+        public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants()
         {
             var restaurants = await mediator.Send(new GetAllRestaurantQuery());
             return Ok(restaurants );
         }
 
         [HttpGet("{Id}")]
-        public async Task<IActionResult> GetRestaurantsById([FromRoute]int Id)
+        public async Task<ActionResult<RestaurantDto>> GetRestaurantsById([FromRoute]int Id)
         {
             var restaurant = await mediator.Send(new GetRestaurantByIdQuery()
             {
                 Id = Id
             });
-            if(restaurant is null )
-            {
-                return NotFound();
-            }
             return Ok(restaurant);
+        }
+
+        [HttpDelete("{Id}")]
+        [ProducesResponseType(statusCode:StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode:StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteRestaurant([FromRoute] int Id)
+        {
+             await mediator.Send(new DeleteRestaurantCommand(Id));           
+             return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(statusCode: StatusCodes.Status204NoContent)]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateRestaurant([FromRoute] int id, UpdateRestaurantCommand command)
+        {
+            command.Id = id;
+            await mediator.Send(command);
+            return NoContent();
         }
 
         [HttpPost]

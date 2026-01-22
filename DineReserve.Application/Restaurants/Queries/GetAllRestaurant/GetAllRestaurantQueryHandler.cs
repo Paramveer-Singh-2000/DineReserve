@@ -9,7 +9,7 @@ using System.Text;
 
 namespace DineReserve.Application.Restaurants.Queries.GetAllRestaurant
 {
-    public class GetAllRestaurantQueryHandler(ILogger logger, IMapper mapper, IRestaurantRepositories restaurantRepositories) : IRequestHandler<GetAllRestaurantQuery, IEnumerable<RestaurantDto>>
+    public class GetAllRestaurantQueryHandler(ILogger<GetAllRestaurantQueryHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories) : IRequestHandler<GetAllRestaurantQuery, IEnumerable<RestaurantDto>>
     {
         public async Task<IEnumerable<RestaurantDto>> Handle(GetAllRestaurantQuery request, CancellationToken cancellationToken)
         {

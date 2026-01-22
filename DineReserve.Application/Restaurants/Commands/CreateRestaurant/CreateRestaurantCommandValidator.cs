@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DineReserve.Application.Commands.CreateRestaurant
+namespace DineReserve.Application.Restaurants.Commands.CreateRestaurant
 {
     public class CreateRestaurantCommandValidator :AbstractValidator<CreateRestaurantCommand>
     {
