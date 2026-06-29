@@ -1,4 +1,5 @@
 ﻿using DineReserve.Application.Restaurants;
+using DineReserve.Application.Users;
 using DineReserve.Domain.Repositories;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,10 @@ namespace DineReserve.Application.Extension
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
             services.AddAutoMapper(assembly);
             services.AddValidatorsFromAssembly(assembly);
+
+            services.AddScoped<IUserContext, UserContext>();
+
+            services.AddHttpContextAccessor();
         }
     }
 }

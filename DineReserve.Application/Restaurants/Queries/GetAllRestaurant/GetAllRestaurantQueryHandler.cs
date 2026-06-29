@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DineReserve.Application.Common;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Domain.Repositories;
 using MediatR;
@@ -9,14 +10,16 @@ using System.Text;
 
 namespace DineReserve.Application.Restaurants.Queries.GetAllRestaurant
 {
-    public class GetAllRestaurantQueryHandler(ILogger<GetAllRestaurantQueryHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories) : IRequestHandler<GetAllRestaurantQuery, IEnumerable<RestaurantDto>>
+    public class GetAllRestaurantQueryHandler(ILogger<GetAllRestaurantQueryHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories) : IRequestHandler<GetAllRestaurantQuery, PagedResult<RestaurantDto>>
     {
-        public async Task<IEnumerable<RestaurantDto>> Handle(GetAllRestaurantQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<RestaurantDto>> Handle(GetAllRestaurantQuery request, CancellationToken cancellationToken)
         {
             logger.LogInformation("Getting all restaurants");
-            var restaurants = await restaurantRepositories.GetAllAsync();
+            var (restaurants, totalCount) = (await restaurantRepositories.GetAllMatchingAsync(request.SearchPhrases, request.PageSize, request.PageNumber, request.SortBy, request.SortDirection));
             var restaurantDto = mapper.Map<IEnumerable<RestaurantDto>>(restaurants);
-            return restaurantDto;
+            var result = new PagedResult<RestaurantDto>(restaurantDto, totalCount, request.PageSize, request.PageNumber);
+            
+            return result;
         }
     }
 }

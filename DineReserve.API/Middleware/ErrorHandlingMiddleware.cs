@@ -18,6 +18,13 @@ namespace DineReserve.API.Middleware
                 var response = new { Message = nfEx.Message };
                 await context.Response.WriteAsJsonAsync(response);
             }
+            catch(ForbidException fEx)
+            {
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                var response = new { Message = "An unexpected error occurred.", Details = fEx.Message };
+                await context.Response.WriteAsJsonAsync(response);
+            }
             catch (Exception ex)
             {
                 context.Response.StatusCode = 500;

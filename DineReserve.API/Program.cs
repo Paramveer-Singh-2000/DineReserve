@@ -1,27 +1,26 @@
-using DineReserve.Infrastructure.Extensions;
-using DineReserve.Infrastructure.Seeders;
-using DineReserve.Application.Extension;
-using Serilog;
+using DineReserve.API.Extensions;
 using DineReserve.API.Middleware;
+using DineReserve.Application.Extension;
+using DineReserve.Domain.Entities;
+using DineReserve.Infrastructure.Authorization;
+using DineReserve.Infrastructure.Extensions;
+using DineReserve.Infrastructure.Persistance;
+using DineReserve.Infrastructure.Seeders;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog from appsettings.json
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    configuration.ReadFrom.Configuration(context.Configuration);
-});
-
-// Services
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<ErrorHandlingMiddleware>();
-builder.Services.AddScoped<RequestTimeLoggingMiddleware>();
-
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.AddPresentationServices();
+builder.Services.AddAuthentication();
+builder.Services
+    .AddIdentityApiEndpoints<User>().AddRoles<IdentityRole>()
+    .AddClaimsPrincipalFactory<RestaurantUserClaimFactoryPrincipal>()
+    .AddEntityFrameworkStores<DineReserveDbContext>();
 
 var app = builder.Build();
 
@@ -40,9 +39,10 @@ app.UseMiddleware<RequestTimeLoggingMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(); 
 }
-
+app.MapGroup("api/identity").WithTags("Identity").MapIdentityApi<User>(); 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

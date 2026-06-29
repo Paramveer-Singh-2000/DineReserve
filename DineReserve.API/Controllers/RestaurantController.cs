@@ -6,7 +6,10 @@ using DineReserve.Application.Restaurants.Commands.UpdateRestaurant;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Application.Restaurants.Queries.GetAllRestaurant;
 using DineReserve.Application.Restaurants.Queries.GetRestaurantById;
+using DineReserve.Domain.Constants;
+using DineReserve.Infrastructure.Authorization;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
@@ -16,16 +19,19 @@ namespace DineReserve.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RestaurantController(IMediator mediator) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants()
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<RestaurantDto>>> GetRestaurants([FromQuery] GetAllRestaurantQuery query)
         {
-            var restaurants = await mediator.Send(new GetAllRestaurantQuery());
+            var restaurants = await mediator.Send(query);
             return Ok(restaurants );
         }
 
         [HttpGet("{Id}")]
+        [Authorize(policy: PolicyNames.HasNationality)]
         public async Task<ActionResult<RestaurantDto>> GetRestaurantsById([FromRoute]int Id)
         {
             var restaurant = await mediator.Send(new GetRestaurantByIdQuery()
@@ -55,6 +61,7 @@ namespace DineReserve.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles =UserRoles.Owner)]
         public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantCommand createRestaurant)
         {
             if(!ModelState.IsValid)

@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using DineReserve.Domain;
+using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
 using DineReserve.Domain.Repositories;
+using DineReserve.Domain.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,7 +12,7 @@ using System.Text;
 
 namespace DineReserve.Application.Restaurants.Commands.UpdateRestaurant
 {
-    internal class UpdateRestaurantHandler(ILogger<UpdateRestaurantHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories) : IRequestHandler<UpdateRestaurantCommand>
+    internal class UpdateRestaurantHandler(ILogger<UpdateRestaurantHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories, IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<UpdateRestaurantCommand>
     {
         public async Task Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
         {
@@ -17,8 +20,11 @@ namespace DineReserve.Application.Restaurants.Commands.UpdateRestaurant
             var restaurant = await restaurantRepositories.GetRestaurantByIdAsync(request.Id);
             if (restaurant is null)
             {
-                throw new NotFoundException($"Restaurant with {request.Id} doesn't exist");
+                throw new NotFoundException(nameof(Restaurant), request.Id.ToString());
             }
+            if (!restaurantAuthorizationService.Authorize(restaurant, Domain.Authorization.ResourceOperations.Delete))
+                throw new ForbidException();
+
             mapper.Map(request, restaurant);
             await restaurantRepositories.SaveChanges();
         }

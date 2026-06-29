@@ -8,13 +8,16 @@ using DineReserve.Application.Restaurants.Commands.DeleteRestaurant;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Application.Restaurants.Queries.GetAllRestaurant;
 using DineReserve.Application.Restaurants.Queries.GetRestaurantById;
+using DineReserve.Infrastructure.Authorization;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DineReserve.API.Controllers
 {
     [Route("api/restaurants/{restaurantId}/dishes")]
     [ApiController]
+    [Authorize]
     public class DishesController(IMediator mediator) : ControllerBase
     {
         [HttpPost]
@@ -26,6 +29,7 @@ namespace DineReserve.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = PolicyNames.AtLeast20)]
         public async Task<ActionResult<IEnumerable<DishDto>>> GetDishes([FromRoute] int restaurantId)
         {
             var dishes = await mediator.Send(new GetAllDishesQuery(restaurantId));

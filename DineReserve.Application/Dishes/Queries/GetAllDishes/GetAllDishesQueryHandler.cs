@@ -2,6 +2,7 @@
 using DineReserve.Application.Dishes.Dtos;
 using DineReserve.Application.Restaurants.Dtos;
 using DineReserve.Application.Restaurants.Queries.GetAllRestaurant;
+using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
 using DineReserve.Domain.Repositories;
 using MediatR;
@@ -22,7 +23,7 @@ namespace DineReserve.Application.Dishes.Queries.GetAllDishes
             if(restaurant == null)
             {
                 logger.LogWarning("Restaurant with Id : {restaurantId} not found", request.RestaurantId);
-                throw new NotFoundException($"Restaurant with Id : {request.RestaurantId} not found");
+                throw new NotFoundException(nameof(Restaurant), request.RestaurantId.ToString());
             }
 
             var dishDtos = mapper.Map<IEnumerable<DishDto>>(restaurant.Dishes);

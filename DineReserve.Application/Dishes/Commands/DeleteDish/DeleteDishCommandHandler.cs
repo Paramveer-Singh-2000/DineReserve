@@ -1,6 +1,9 @@
 ﻿using DineReserve.Application.Restaurants.Commands.DeleteRestaurant;
+using DineReserve.Domain;
+using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
 using DineReserve.Domain.Repositories;
+using DineReserve.Domain.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,7 +12,7 @@ using System.Text;
 
 namespace DineReserve.Application.Dishes.Commands.DeleteRestaurant
 {
-    public class DeleteDishQueryHandler(ILogger<DeleteRestaurantHandler> logger, IRestaurantRepositories restaurantRepositories) : IRequestHandler<DeleteDishCommand>
+    public class DeleteDishQueryHandler(ILogger<DeleteRestaurantHandler> logger, IRestaurantRepositories restaurantRepositories, IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<DeleteDishCommand>
     {
         public async Task Handle(DeleteDishCommand request, CancellationToken cancellationToken)
         {
@@ -17,8 +20,10 @@ namespace DineReserve.Application.Dishes.Commands.DeleteRestaurant
             var restaurant = await restaurantRepositories.GetRestaurantByIdAsync(request.Id);
             if (restaurant is null)
             {
-                throw new NotFoundException($"Restaurant with {request.Id} doesn't exist");
+                throw new NotFoundException(nameof(Restaurant), request.Id.ToString());
             }
+            if (!restaurantAuthorizationService.Authorize(restaurant, Domain.Authorization.ResourceOperations.Delete))
+                throw new ForbidException();
             await restaurantRepositories.DeleteRestaurantAsync(restaurant);
         }
     }

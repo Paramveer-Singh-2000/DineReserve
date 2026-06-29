@@ -1,6 +1,9 @@
+using DineReserve.Domain.Constants;
 using DineReserve.Domain.Entities;
 using DineReserve.Infrastructure.Persistance;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace DineReserve.Infrastructure.Seeders;
 
@@ -8,7 +11,7 @@ public class RestaurantSeeder(DineReserveDbContext context) : IRestaurantSeeder
 {
     public async Task SeedAsync()
     {
-        if(context.Database.CanConnect())
+        if (context.Database.CanConnect())
         {
             if (!context.Restaurants.Any())
             {
@@ -16,7 +19,27 @@ public class RestaurantSeeder(DineReserveDbContext context) : IRestaurantSeeder
                 context.Restaurants.AddRange(resturants);
                 await context.SaveChangesAsync();
             }
+            if (!context.Roles.Any())
+            {
+                var roles = GetRolesAsync();
+                context.Roles.AddRange(roles);
+                await context.SaveChangesAsync();
+            }
         }
+    }
+    public IEnumerable<IdentityRole> GetRolesAsync()
+    {
+        List<IdentityRole> roles =
+            [
+            new(UserRoles.User){
+                NormalizedName = UserRoles.User.ToUpper()
+            },
+            new(UserRoles.Admin){
+                NormalizedName = UserRoles.Admin.ToUpper()
+            },
+            new(UserRoles.Owner){ NormalizedName = UserRoles.Owner.ToUpper() }
+            ];
+        return roles;
     }
 
     private IEnumerable<Restaurant> GetRestaurants()
