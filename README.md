@@ -3,7 +3,6 @@
 
 [![CI](https://github.com/Paramveer-Singh-2000/DineReserve/actions/workflows/ci.yml/badge.svg)](https://github.com/Paramveer-Singh-2000/DineReserve/actions/workflows/ci.yml)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)
-![Tests](https://img.shields.io/badge/tests-87%20passing-brightgreen)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 A restaurant & menu management API built with **.NET 10** and **Clean Architecture**, demonstrating CQRS with MediatR, policy- and claims-based authorization, and a deeply tested Application layer.
