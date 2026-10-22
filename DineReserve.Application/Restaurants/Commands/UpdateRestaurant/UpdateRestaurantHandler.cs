@@ -22,8 +22,8 @@ namespace DineReserve.Application.Restaurants.Commands.UpdateRestaurant
             {
                 throw new NotFoundException(nameof(Restaurant), request.Id.ToString());
             }
-            if (!restaurantAuthorizationService.Authorize(restaurant, Domain.Authorization.ResourceOperations.Delete))
-                throw new ForbidException();
+            if (!restaurantAuthorizationService.Authorize(restaurant, Domain.Authorization.ResourceOperations.Update))
+                throw new ForbidException($"You are not allowed to update restaurant with id: {request.Id}.");
 
             mapper.Map(request, restaurant);
             await restaurantRepositories.SaveChanges();

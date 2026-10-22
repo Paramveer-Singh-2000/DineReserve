@@ -18,7 +18,7 @@ namespace DineReserve.Application.Restaurants.Commands.CreateRestaurant
             RuleFor(x => x.Category).NotEmpty().WithMessage("Address is required.").Must(x => allowedCatagories.Contains(x));
             RuleFor(x => x.ContactEmail).NotEmpty().EmailAddress().WithMessage("A valid contact email is required.");
             RuleFor(x => x.ContactPhone).NotEmpty().WithMessage("Contact number is required.");
-            RuleFor(x => x.ZipCode).Matches("@\"^\\d{2}(-\\d{3})?$\"").WithMessage("Enter a valid zip code");
+            RuleFor(x => x.ZipCode).Matches(@"^\d{5}(-\d{4})?$").WithMessage("Enter a valid zip code");
 
 
 

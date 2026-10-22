@@ -5,9 +5,9 @@ using System.Text;
 
 namespace DineReserve.Application.Dishes.Commands.DeleteRestaurant
 {
-    public class DeleteDishCommand(int restaurantId):IRequest
+    public class DeleteDishCommand(int restaurantId, int dishId) : IRequest
     {
-        public int Id { get; set; } = restaurantId;
-
+        public int RestaurantId { get; } = restaurantId;
+        public int DishId { get; } = dishId;
     }
 }

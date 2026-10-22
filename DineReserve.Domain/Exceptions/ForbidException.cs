@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DineReserve.Domain.Exceptions
 {
-    public class ForbidException: Exception
+    public class ForbidException(string message = "You are not allowed to perform this operation.") : Exception(message)
     {
     }
 }

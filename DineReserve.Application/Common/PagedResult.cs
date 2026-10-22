@@ -11,7 +11,7 @@ namespace DineReserve.Application.Common
         {
             Items = items;
             TotalItemCount = totalCount;
-            TotalPages = totalCount/pageSize; 
+            TotalPages = pageSize > 0 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 0;
             ItemFrom = pageSize * (pageNumber - 1);
             ItemTo = ItemFrom  + pageSize - 1;
         }

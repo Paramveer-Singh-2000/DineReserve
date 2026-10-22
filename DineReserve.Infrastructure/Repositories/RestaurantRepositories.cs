@@ -56,7 +56,7 @@ namespace DineReserve.Infrastructure.Repositories
 
             var restaurants = await baseQuery
                 .Skip(pageSize * (pageNumber - 1))
-                .Take(5)
+                .Take(pageSize)
                 .ToListAsync();
             return (restaurants, totalCount);
         }

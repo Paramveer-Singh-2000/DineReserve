@@ -1,30 +1,40 @@
-﻿using DineReserve.Application.Restaurants.Commands.DeleteRestaurant;
-using DineReserve.Domain;
+﻿using DineReserve.Application.Dishes.Commands.DeleteRestaurant;
+using DineReserve.Domain.Authorization;
 using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
 using DineReserve.Domain.Repositories;
 using DineReserve.Domain.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace DineReserve.Application.Dishes.Commands.DeleteRestaurant
+namespace DineReserve.Application.Dishes.Commands.DeleteDish
 {
-    public class DeleteDishQueryHandler(ILogger<DeleteRestaurantHandler> logger, IRestaurantRepositories restaurantRepositories, IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<DeleteDishCommand>
+    public class DeleteDishCommandHandler(
+        ILogger<DeleteDishCommandHandler> logger,
+        IRestaurantRepositories restaurantRepositories,
+        IDishesRepositories dishesRepositories,
+        IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<DeleteDishCommand>
     {
         public async Task Handle(DeleteDishCommand request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Deleting a Restaurant with Id: {RestaurantId}", request.Id);
-            var restaurant = await restaurantRepositories.GetRestaurantByIdAsync(request.Id);
+            logger.LogInformation("Deleting Dish with Id: {DishId} for Restaurant with Id: {RestaurantId}", request.DishId, request.RestaurantId);
+
+            var restaurant = await restaurantRepositories.GetRestaurantByIdAsync(request.RestaurantId);
             if (restaurant is null)
             {
-                throw new NotFoundException(nameof(Restaurant), request.Id.ToString());
+                throw new NotFoundException(nameof(Restaurant), request.RestaurantId.ToString());
             }
-            if (!restaurantAuthorizationService.Authorize(restaurant, Domain.Authorization.ResourceOperations.Delete))
-                throw new ForbidException();
-            await restaurantRepositories.DeleteRestaurantAsync(restaurant);
+
+            var dish = restaurant.Dishes.FirstOrDefault(d => d.Id == request.DishId);
+            if (dish is null)
+            {
+                throw new NotFoundException(nameof(Dish), request.DishId.ToString());
+            }
+
+            if (!restaurantAuthorizationService.Authorize(restaurant, ResourceOperations.Delete))
+                throw new ForbidException($"You are not allowed to delete dishes from restaurant with id: {request.RestaurantId}.");
+
+            await dishesRepositories.DeleteDishAsync([dish]);
         }
     }
 }
