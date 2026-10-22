@@ -1,9 +1,19 @@
+# .NET build files
 bin/
 obj/
 /packages/
+
+# JetBrains Rider and ReSharper
 riderModule.iml
 /_ReSharper.Caches/
-.DS_Store
 .idea/
+
+# Visual Studio
 .vs/
+
+# macOS
+.DS_Store
+
+# Application logs
 **/Logs/
+
