@@ -48,15 +48,26 @@ namespace DineReserve.Infrastructure.Repositories
                     { nameof(Restaurant.Description), r => r.Description },
                     { nameof(Restaurant.Category), r => r.Category }
                 };
-                var selectedColumn = columnsSelector[sortBy];
+                if (!columnsSelector.TryGetValue(sortBy, out var selectedColumn))
+                {
+                    throw new ArgumentException(
+                        $"Unsupported sort column: {sortBy}",
+                        nameof(sortBy));
+                }
                 baseQuery = sortDirection == SortDirection.Ascending
                     ? baseQuery.OrderBy(selectedColumn)
                     : baseQuery.OrderByDescending(selectedColumn);
             }
 
+            if (sortBy == null)
+            {
+                baseQuery = baseQuery.OrderBy(r => r.Id);
+            }
+
             var restaurants = await baseQuery
                 .Skip(pageSize * (pageNumber - 1))
                 .Take(pageSize)
+                .AsNoTracking()
                 .ToListAsync();
             return (restaurants, totalCount);
         }
