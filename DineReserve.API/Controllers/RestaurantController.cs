@@ -1,6 +1,4 @@
-﻿using DineReserve.Application.Commands.DeleteRestaurant;
-using DineReserve.Application.Restaurants;
-using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
+﻿using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
 using DineReserve.Application.Restaurants.Commands.DeleteRestaurant;
 using DineReserve.Application.Restaurants.Commands.UpdateRestaurant;
 using DineReserve.Application.Restaurants.Dtos;

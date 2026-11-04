@@ -39,26 +39,20 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Swagger
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Redirect localhost to Swagger
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Identity endpoints
 app.MapGroup("/api/identity")
     .MapIdentityApi<User>();
 
-// Controllers
 app.MapControllers();
 
 app.Run();

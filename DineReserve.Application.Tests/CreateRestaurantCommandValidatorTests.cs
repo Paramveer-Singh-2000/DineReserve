@@ -1,72 +1,110 @@
-﻿using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
+﻿
+using DineReserve.Application.Restaurants.Commands.CreateRestaurant;
 using FluentValidation.TestHelper;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Xunit;
 
-namespace DineReserve.Application.Tests
+namespace DineReserve.Application.Tests;
+
+public class CreateRestaurantCommandValidatorTests
 {
-    public class CreateRestaurantCommandValidatorTests
+    private readonly CreateRestaurantCommandValidator _validator = new();
+
+    private static CreateRestaurantCommand ValidCommand() => new()
     {
-        [Fact]
-        public void Validator_ForValidCommand_ShouldNotHaveValidationErrors()
-        {
-            // Arrange
-            var command = new CreateRestaurantCommand
-            {
-                Name = "Test Restaurant",
-                Category = "Italian",
-                ZipCode = "12345",
-                ContactEmail = "test@example.com "
-            };
-            var validator = new CreateRestaurantCommandValidator();
-            // Act
-            var result = validator.TestValidate(command);
-            // Assert
-            result.ShouldNotHaveAnyValidationErrors();
-        }
+        Name = "Test Restaurant",
+        Description = "A family restaurant serving fresh food",
+        Category = "Italian",
+        ContactEmail = "test@example.com",
+        ContactPhone = "8055551234",
+        ZipCode = "12345",
+        Street = "123 Main Street",
+        City = "Thousand Oaks",
+        State = "CA",
+        Country = "USA"
+    };
 
-        [Fact]
-        public void Validator_ForInvalidCommand_ShouldHaveValidationErrors ()
-        {
-            // Arrange
-            var command = new CreateRestaurantCommand
-            {
-                Name = "Tes",
-                Category = "Ialian",
-                ZipCode = "1345",
-                ContactEmail = "testmple.com "
-            };
-            var validator = new CreateRestaurantCommandValidator();
-            // Act
-            var result = validator.TestValidate(command);
-            // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Name);
-            result.ShouldHaveValidationErrorFor(x => x.Category);
-            result.ShouldHaveValidationErrorFor(x => x.ZipCode);
-            result.ShouldHaveValidationErrorFor(x => x.ContactEmail);
-        }
+    [Fact]
+    public void Validator_ForValidCommand_ShouldNotHaveValidationErrors()
+    {
+        var command = ValidCommand();
 
-        [Theory]
-        [InlineData("Italian")]
-        [InlineData("Chinese")]
-        [InlineData("Mexican")]
-        [InlineData("Indian")]
-        public void Validator_ForValidCategory_ShouldNotHaveValidationErrors(string category)
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public void Validator_ForInvalidCommand_ShouldHaveValidationErrors()
+    {
+        var command = new CreateRestaurantCommand
         {
-            // Arrange
-            var command = new CreateRestaurantCommand
-            {
-                Name = "Test Restaurant",
-                Category = category,
-                ZipCode = "12345",
-                ContactEmail = "test@example.com"
-            };
-            var validator = new CreateRestaurantCommandValidator();
-            // Act
-            var result = validator.TestValidate(command);
-            // Assert
-            result.ShouldNotHaveAnyValidationErrors();
-          }
+            Name = "Te",
+            Description = "",
+            Category = "Ialian",
+            ContactEmail = "invalid-email",
+            ContactPhone = "",
+            ZipCode = "1345"
+        };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Name);
+        result.ShouldHaveValidationErrorFor(x => x.Description);
+        result.ShouldHaveValidationErrorFor(x => x.Category);
+        result.ShouldHaveValidationErrorFor(x => x.ContactEmail);
+        result.ShouldHaveValidationErrorFor(x => x.ContactPhone);
+        result.ShouldHaveValidationErrorFor(x => x.ZipCode);
+    }
+
+    [Theory]
+    [InlineData("Italian")]
+    [InlineData("Chinese")]
+    [InlineData("Mexican")]
+    [InlineData("Indian")]
+    public void Validator_ForValidCategory_ShouldNotHaveValidationErrors(
+        string category)
+    {
+        var command = ValidCommand();
+        command.Category = category;
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Te")]
+    public void Validator_ForInvalidName_ShouldHaveValidationErrors(
+        string name)
+    {
+        var command = ValidCommand();
+        command.Name = name;
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Name);
+    }
+
+    [Fact]
+    public void Validator_ForMissingDescription_ShouldHaveValidationError()
+    {
+        var command = ValidCommand();
+        command.Description = "";
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Description);
+    }
+
+    [Fact]
+    public void Validator_ForMissingContactPhone_ShouldHaveValidationError()
+    {
+        var command = ValidCommand();
+        command.ContactPhone = "";
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.ContactPhone);
     }
 }
