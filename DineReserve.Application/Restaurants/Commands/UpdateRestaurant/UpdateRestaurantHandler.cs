@@ -12,7 +12,7 @@ using System.Text;
 
 namespace DineReserve.Application.Restaurants.Commands.UpdateRestaurant
 {
-    internal class UpdateRestaurantHandler(ILogger<UpdateRestaurantHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories, IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<UpdateRestaurantCommand>
+    public class UpdateRestaurantHandler(ILogger<UpdateRestaurantHandler> logger, IMapper mapper, IRestaurantRepositories restaurantRepositories, IRestaurantAuthorizationService restaurantAuthorizationService) : IRequestHandler<UpdateRestaurantCommand>
     {
         public async Task Handle(UpdateRestaurantCommand request, CancellationToken cancellationToken)
         {

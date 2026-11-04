@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DineReserve.Infrastructure.Authorization.Requirements
 {
-    internal class CreateMultipleRestaurantRequirementHandler(IRestaurantRepositories restaurantRepositories, IUserContext userContext) : AuthorizationHandler<CreateMultipleRestaurantRequirement>
+    public class CreateMultipleRestaurantRequirementHandler(IRestaurantRepositories restaurantRepositories, IUserContext userContext) : AuthorizationHandler<CreateMultipleRestaurantRequirement>
     {
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CreateMultipleRestaurantRequirement requirement)
         {

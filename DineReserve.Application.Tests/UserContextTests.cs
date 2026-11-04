@@ -1,66 +1,57 @@
-﻿using DineReserve.Application.Users;
+﻿
+using DineReserve.Application.Users;
 using DineReserve.Domain.Constants;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Moq;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
+using Xunit;
 
-namespace DineReserve.Application.Tests
+namespace DineReserve.Application.Tests;
+
+public class UserContextTests
 {
-    public class UserContextTests
+    [Fact]
+    public void GetCurrentUser_AuthenticatedUser_ReturnsExpectedUser()
     {
-        [Fact]
-        public void GetCurrentUser_AuthenticatedUser_ReturnsExpectedUser()
+        // Arrange
+        var dob = new DateOnly(1990, 1, 1);
+
+        var claims = new List<Claim>
         {
-            // Arrange
-            var dob = new DateOnly(1990, 1, 1);
-            var httpcontext = new Mock<IHttpContextAccessor>();
-            var claim = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "123"),
-                new Claim(ClaimTypes.Name, "John Doe"),
-                new Claim(ClaimTypes.Email, "john.doe@example.com"),
-                new Claim(ClaimTypes.Role, "Admin"),
-                new Claim(ClaimTypes.Role, "User"),
-                new Claim("Nationality", "American"),
-                new Claim("DateOfBirth", dob.ToString("yyyy-MM-dd"))
-            };
+            new(ClaimTypes.NameIdentifier, "123"),
+            new(ClaimTypes.Name, "John Doe"),
+            new(ClaimTypes.Email, "john.doe@example.com"),
+            new(ClaimTypes.Role, UserRoles.Admin),
+            new(ClaimTypes.Role, UserRoles.User),
+            new("Nationality", "American"),
+            new("DateOfBirth", dob.ToString("yyyy-MM-dd"))
+        };
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claim,"test"));
-            httpcontext.Setup(x => x.HttpContext).Returns(new DefaultHttpContext
-            {
-                User = user
-            });
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(claims, "TestAuth"));
 
-            var userContext = new UserContext(httpcontext.Object);
+        var httpContext = new DefaultHttpContext
+        {
+            User = principal
+        };
 
-            // Act
+        var accessor = new HttpContextAccessor
+        {
+            HttpContext = httpContext
+        };
 
-            var currentUser = userContext.GetCurrentUser();
+        var userContext = new UserContext(accessor);
 
-            // Assert
-            currentUser.Should().NotBeNull();
-            currentUser!.UserId.Should().Be("123");
-            currentUser.Email.Should().Be("john.doe@example.com");
-            currentUser.Roles.Should().ContainInOrder(UserRoles.Admin, UserRoles.User);
-            currentUser.Nationality.Should().Be("American");
-            currentUser.DateOfBirth.Should().Be(dob);
+        // Act
+        var currentUser = userContext.GetCurrentUser();
 
-
-
-
-        }
-
-        //[Fact]
-        //public void GetCurrentUser_WithNoUsercontextPresent_ThrowsException()
-        //{
-        //    // Arrange
-        //    var httpcontext = new Mock<IHttpContextAccessor>();
-
-
-        //}
-}
+        // Assert
+        currentUser.Should().NotBeNull();
+        currentUser!.UserId.Should().Be("123");
+        currentUser.Email.Should().Be("john.doe@example.com");
+        currentUser.Roles.Should()
+            .ContainInOrder(UserRoles.Admin, UserRoles.User);
+        currentUser.Nationality.Should().Be("American");
+        currentUser.DateOfBirth.Should().Be(dob);
+    }
 }

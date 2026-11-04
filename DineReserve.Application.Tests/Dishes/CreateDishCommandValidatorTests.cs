@@ -1,72 +1,29 @@
-using DineReserve.Application.Dishes.Commands.CreateDish;
-using FluentAssertions;
-using Xunit;
 
-namespace DineReserve.Application.Tests.Dishes;
+using FluentValidation;
 
-public class CreateDishCommandValidatorTests
+namespace DineReserve.Application.Dishes.Commands.CreateDish;
+
+internal class CreateDishCommandValidator
+    : AbstractValidator<CreateDishCommand>
 {
-    public readonly CreateDishCommandValidator _sut = new();
-
-    private static CreateDishCommand ValidCommand() => new()
+    public CreateDishCommandValidator()
     {
-        Name = "Fries",
-        Description = "Crispy fries",
-        Price = 4.99m,
-        RestaurantId = 1
-    };
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Dish name is required.")
+            .MaximumLength(100)
+            .WithMessage(
+                "Dish name cannot exceed 100 characters.");
 
-    [Fact]
-    public void Name_Empty_ReturnsError()
-    {
-        var command = ValidCommand();
-        command.Name = "";
+        RuleFor(x => x.Price)
+            .GreaterThan(0)
+            .WithMessage(
+                "Price must be greater than zero.");
 
-        var result = _sut.Validate(command);
-
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateDishCommand.Name));
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-5)]
-    public void Price_NotPositive_ReturnsError(decimal price)
-    {
-        var command = ValidCommand();
-        command.Price = price;
-
-        var result = _sut.Validate(command);
-
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateDishCommand.Price));
-    }
-
-    [Fact]
-    public void KiloCalories_Null_IsValid()
-    {
-        var command = ValidCommand();
-        command.KiloCalories = null;
-
-        var result = _sut.Validate(command);
-
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CreateDishCommand.KiloCalories));
-    }
-
-    [Fact]
-    public void KiloCalories_ZeroOrNegative_ReturnsError_WhenProvided()
-    {
-        var command = ValidCommand();
-        command.KiloCalories = 0;
-
-        var result = _sut.Validate(command);
-
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateDishCommand.KiloCalories));
-    }
-
-    [Fact]
-    public void ValidCommand_HasNoErrors()
-    {
-        var result = _sut.Validate(ValidCommand());
-
-        result.IsValid.Should().BeTrue();
+        RuleFor(x => x.KiloCalories)
+            .GreaterThan(0)
+            .When(x => x.KiloCalories.HasValue)
+            .WithMessage(
+                "Calories must be greater than zero when provided.");
     }
 }

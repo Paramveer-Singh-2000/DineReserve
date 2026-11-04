@@ -18,5 +18,9 @@
     <ItemGroup>
       <ProjectReference Include="..\DineReserve.Application\DineReserve.Application.csproj" />
     </ItemGroup>
+	
+	<ItemGroup>
+		<InternalsVisibleTo Include="DineReserve.Application.Tests" />
+	</ItemGroup>
 
 </Project>

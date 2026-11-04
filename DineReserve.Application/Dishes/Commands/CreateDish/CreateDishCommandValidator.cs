@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DineReserve.Application.Dishes.Commands.CreateDish
 {
-    internal class CreateDishCommandValidator :AbstractValidator<CreateDishCommand>
+    public class CreateDishCommandValidator :AbstractValidator<CreateDishCommand>
     {
         public CreateDishCommandValidator()
         {

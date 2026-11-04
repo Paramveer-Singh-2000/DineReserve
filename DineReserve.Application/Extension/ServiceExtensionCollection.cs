@@ -16,7 +16,7 @@ namespace DineReserve.Application.Extension
         {
             var assembly = typeof(ServiceExtensionCollection).Assembly;
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
-            services.AddAutoMapper(assembly);
+            services.AddAutoMapper(cfg => { }, assembly);
             services.AddValidatorsFromAssembly(assembly);
 
             services.AddScoped<IUserContext, UserContext>();
