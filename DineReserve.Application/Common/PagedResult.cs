@@ -1,24 +1,43 @@
-﻿using DineReserve.Application.Restaurants.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+namespace DineReserve.Application.Common;
 
-namespace DineReserve.Application.Common
+public class PagedResult<T>
 {
-    public class PagedResult<T>
+    public PagedResult(
+        IEnumerable<T> items,
+        int totalCount,
+        int pageSize,
+        int pageNumber)
     {
-        public PagedResult(IEnumerable<T> items, int totalCount, int pageSize, int pageNumber)
+        Items = items;
+        TotalItemCount = totalCount;
+
+        TotalPages = pageSize > 0 && totalCount > 0
+            ? (int)Math.Ceiling(totalCount / (double)pageSize)
+            : 0;
+
+        var offset = (long)(pageNumber - 1) * pageSize;
+
+        if (totalCount <= 0 ||
+            pageSize <= 0 ||
+            pageNumber < 1 ||
+            offset >= totalCount)
         {
-            Items = items;
-            TotalItemCount = totalCount;
-            TotalPages = pageSize > 0 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 0;
-            ItemFrom = pageSize * (pageNumber - 1);
-            ItemTo = ItemFrom  + pageSize - 1;
+            ItemFrom = 0;
+            ItemTo = 0;
         }
-        public IEnumerable<T> Items { get; set; }
-        public int TotalPages { get; set; }
-        public int TotalItemCount { get; set; }
-        public int ItemFrom {  get; set; }
-        public int ItemTo { get; set; }
-}
+        else
+        {
+            ItemFrom = (int)offset + 1;
+            ItemTo = (int)Math.Min(
+                totalCount,
+                offset + pageSize);
+        }
+    }
+
+    public IEnumerable<T> Items { get; }
+    public int TotalPages { get; }
+    public int TotalItemCount { get; }
+    public int ItemFrom { get; }
+    public int ItemTo { get; }
 }

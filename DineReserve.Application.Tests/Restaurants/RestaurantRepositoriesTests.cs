@@ -1,5 +1,6 @@
 using DineReserve.Domain.Constants;
 using DineReserve.Domain.Entities;
+using DineReserve.Application.Common;
 using DineReserve.Infrastructure.Persistance;
 using DineReserve.Infrastructure.Repositories;
 using FluentAssertions;
@@ -67,7 +68,8 @@ public class RestaurantRepositoriesTests
 
         await sut.DeleteRestaurantAsync(restaurant);
 
-        (await context.FindAsync(restaurant.Id)).Should().BeNull();
+        (await context.Restaurants.FindAsync(restaurant.Id))
+    .Should().BeNull();
     }
 
     [Fact]

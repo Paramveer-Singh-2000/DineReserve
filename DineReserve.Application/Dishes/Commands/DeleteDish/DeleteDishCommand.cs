@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DineReserve.Application.Dishes.Commands.DeleteRestaurant
+namespace DineReserve.Application.Dishes.Commands.DeleteDish
 {
     public class DeleteDishCommand(int restaurantId, int dishId) : IRequest
     {

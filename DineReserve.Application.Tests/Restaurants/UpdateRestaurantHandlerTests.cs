@@ -9,6 +9,7 @@ using DineReserve.Domain.Services;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using DineReserve.Application.Tests.TestHelpers;
 using Xunit;
 
 namespace DineReserve.Application.Tests.Restaurants;
@@ -26,8 +27,7 @@ public class UpdateRestaurantHandlerTests
 
     public UpdateRestaurantHandlerTests()
     {
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<RestaurantProfile>());
-        _mapper = config.CreateMapper();
+        _mapper = MapperTestHelper.CreateMapper();
         _sut = new UpdateRestaurantHandler(
             Substitute.For<ILogger<UpdateRestaurantHandler>>(),
             _mapper,

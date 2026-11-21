@@ -1,5 +1,4 @@
-﻿using DineReserve.Application.Dishes.Commands.DeleteRestaurant;
-using DineReserve.Domain.Authorization;
+﻿using DineReserve.Domain.Authorization;
 using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
 using DineReserve.Domain.Repositories;

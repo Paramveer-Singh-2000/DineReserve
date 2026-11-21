@@ -1,4 +1,6 @@
 using DineReserve.Application.Dishes.Commands.CreateDish;
+using DineReserve.Domain.Authorization;
+using DineReserve.Domain.Services;
 using DineReserve.Application.Tests.TestHelpers;
 using DineReserve.Domain.Entities;
 using DineReserve.Domain.Exceptions;
@@ -12,17 +14,26 @@ namespace DineReserve.Application.Tests.Dishes;
 
 public class CreateDishHandlerTests
 {
+    private readonly IRestaurantAuthorizationService
+    _authorizationService =
+        Substitute.For<IRestaurantAuthorizationService>();
     private readonly IRestaurantRepositories _restaurantRepositories = Substitute.For<IRestaurantRepositories>();
     private readonly IDishesRepositories _dishesRepositories = Substitute.For<IDishesRepositories>();
     private readonly CreateDishHandler _sut;
 
     public CreateDishHandlerTests()
     {
+        _authorizationService.Authorize(
+            Arg.Any<Restaurant>(),
+            ResourceOperations.Update)
+            .Returns(true);
+
         _sut = new CreateDishHandler(
             Substitute.For<ILogger<CreateDishHandler>>(),
             MapperTestHelper.CreateMapper(),
             _restaurantRepositories,
-            _dishesRepositories);
+            _dishesRepositories,
+            _authorizationService);
     }
 
     [Fact]
@@ -49,4 +60,42 @@ public class CreateDishHandlerTests
         await _dishesRepositories.Received(1).Create(Arg.Is<Dish>(d =>
             d.Name == "Fries" && d.Description == "Crispy" && d.Price == 4.99m && d.KiloCalories == 300));
     }
+
+    [Fact]
+    public async Task Handle_RejectsUnauthorizedDishCreation()
+    {
+        var restaurant = new Restaurant
+        {
+            Id = 1,
+            Name = "Test Restaurant",
+            Description = "Test",
+            Category = "Italian",
+            OwnerId = "owner-1"
+        };
+
+        _restaurantRepositories
+            .GetRestaurantByIdAsync(1)
+            .Returns(restaurant);
+
+        _authorizationService.Authorize(
+            restaurant,
+            ResourceOperations.Update)
+            .Returns(false);
+
+        var command = new CreateDishCommand
+        {
+            RestaurantId = 1,
+            Name = "Pizza",
+            Price = 12.99m
+        };
+
+        var act = () => _sut.Handle(
+            command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ForbidException>();
+
+        await _dishesRepositories.DidNotReceive()
+            .Create(Arg.Any<Dish>());
+    }
+
 }

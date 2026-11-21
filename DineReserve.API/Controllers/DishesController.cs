@@ -1,5 +1,5 @@
 ﻿using DineReserve.Application.Dishes.Commands.CreateDish;
-using DineReserve.Application.Dishes.Commands.DeleteRestaurant;
+using DineReserve.Application.Dishes.Commands.DeleteDish;
 using DineReserve.Application.Dishes.Dtos;
 using DineReserve.Application.Dishes.Queries.GetAllDishes;
 using DineReserve.Application.Dishes.Queries.GetDishById;

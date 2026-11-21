@@ -1,5 +1,5 @@
 using DineReserve.Application.Restaurants.Queries.GetAllRestaurant;
-using DineReserve.Domain.Constants;
+using DineReserve.Application.Common;
 using FluentAssertions;
 using Xunit;
 
