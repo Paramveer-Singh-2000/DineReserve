@@ -1,116 +1,92 @@
-[README.md](https://github.com/user-attachments/files/29836402/README.md)
-# DineReserve
+# DineReserve — restaurant management API
 
-[![CI](https://github.com/Paramveer-Singh-2000/DineReserve/actions/workflows/ci.yml/badge.svg)](https://github.com/Paramveer-Singh-2000/DineReserve/actions/workflows/ci.yml)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
-A restaurant & menu management API built with **.NET 10** and **Clean Architecture**, demonstrating CQRS with MediatR, policy- and claims-based authorization, and a deeply tested Application layer.
+**An ASP.NET Core REST API demonstrating Clean Architecture, CQRS with MediatR, and EF Core / SQL Server.**
 
-> Restaurant owners can list their restaurants and menus; customers can browse, search, sort, and paginate through them. Write operations are governed by ownership-based and role-based authorization policies.
+DineReserve manages restaurants, dishes, user roles, and authorized write operations. The repository separates Domain, Application, Infrastructure, and API concerns and includes a substantial xUnit test project.
 
-## Why this project
+## Technology
 
-This is a from-scratch implementation (not a tutorial clone) built to practice and demonstrate:
-- **Clean Architecture** with strict dependency direction (Domain → Application → Infrastructure → API)
-- **CQRS** using MediatR, with commands/queries/handlers/validators grouped by feature (vertical slices)
-- **ASP.NET Core Identity** with a custom `ClaimsPrincipalFactory` and both role-based (`[Authorize(Roles = ...)]`) and requirement-based (`IAuthorizationHandler`) policies
-- **FluentValidation** for request validation, decoupled from controllers
-- **AutoMapper** profiles for entity ↔ DTO mapping
-- **Structured logging** with Serilog (console + rolling file sinks)
-- **A properly layered, deep test suite** — not just a token test project (see below)
-
-## Tech stack
-
-| Layer | Technologies |
-|---|---|
-| API | ASP.NET Core 10, Swagger/OpenAPI, Serilog.AspNetCore |
-| Application | MediatR (CQRS), FluentValidation, AutoMapper |
-| Domain | Plain C# entities, repository interfaces, domain exceptions |
-| Infrastructure | EF Core 10 + SQL Server, ASP.NET Core Identity |
-| CI | GitHub Actions (build + test on every push/PR) |
+- **API:** ASP.NET Core 10, controllers, Swagger/OpenAPI
+- **Application:** MediatR, FluentValidation, AutoMapper
+- **Infrastructure:** EF Core 10, SQL Server, ASP.NET Core Identity
+- **Testing:** xUnit and mocked application dependencies; EF Core InMemory tests
+- **Other:** Role-based, claims-based, and resource-ownership authorization
 
 ## Architecture
 
+```text
+DineReserve.API             Controllers, HTTP pipeline, Swagger, auth
+         |
+DineReserve.Application     Commands, queries, handlers, DTOs, validators
+         |
+DineReserve.Domain          Entities, contracts, exceptions
+         ^
+DineReserve.Infrastructure  Persistence, repository implementations, authorization
 ```
-DineReserve.Domain            Entities, repository interfaces, domain exceptions, no external dependencies
-   ↑
-DineReserve.Application       CQRS commands/queries + handlers, validators, DTOs, AutoMapper profiles
-   ↑
-DineReserve.Infrastructure    EF Core DbContext, repository implementations, Identity, authorization handlers
-   ↑
-DineReserve.API               Controllers, middleware, DI wiring, Swagger
-```
 
-Each feature (e.g. `Restaurants/Commands/CreateRestaurant`) is a self-contained vertical slice: `Command`, `Validator`, and `Handler` live together instead of being split across technical folders.
+Projects are organized around a layered architecture. The Application layer groups commands, handlers, and validators by feature.
 
-### Authorization model
+## Run locally
 
-- **Read** and **Create** are open to any authenticated request (subject to role checks on the endpoint).
-- **Update** and **Delete** on a restaurant (and its dishes) require the caller to be the restaurant's owner, *or* an Admin for Delete.
-- A couple of endpoints also demonstrate claims-based policies (`RequireClaim`) and custom `IAuthorizationHandler` requirements (minimum age from a `DateOfBirth` claim, minimum restaurant count) — these exist to showcase the pattern, not as real product rules.
-
-## Getting started
-
-### Prerequisites
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- SQL Server (LocalDB, a container, or a full instance)
-
-### Run it
+**Prerequisites:** .NET 10 SDK and SQL Server.
 
 ```bash
 git clone https://github.com/Paramveer-Singh-2000/DineReserve.git
 cd DineReserve
+dotnet restore DineReserve.slnx
+dotnet build DineReserve.slnx
+```
 
-# point this at your own SQL Server instance if not using the default LocalDB config
-# DineReserve.API/appsettings.json -> ConnectionStrings:DineReserveDb
+Configure `ConnectionStrings:DineReserveDb` for your SQL Server instance, preferably using local .NET user secrets or environment variables. Use EF Core migrations to set up the database before running the app. Note: the current API startup code does **not** automatically apply migrations or call the seeder.
 
-dotnet restore
-dotnet build
+```bash
+dotnet ef database update --project DineReserve.Infrastructure --startup-project DineReserve.API
 dotnet run --project DineReserve.API
 ```
 
-On first run, the API applies the seed data (two sample restaurants with dishes, plus the `User`/`Admin`/`Owner` roles) and opens Swagger UI at `/swagger` in Development.
+Find the Development-mode Swagger UI at `/swagger` on the host/port printed by `dotnet run`.
 
+## Selected endpoints
 
-| Folder | What's covered |
-|---|---|
-| `Authorization/` | The ownership/role authorization service, and both custom `IAuthorizationHandler` requirements (minimum age, minimum restaurant count) — including edge cases like "turns 20 exactly today" and "no DOB claim set" |
-| `Restaurants/` | Every Restaurant command/query handler, the `CreateRestaurant`/`UpdateRestaurant`/`GetAllRestaurant` validators, and `RestaurantRepositories` (CRUD, search-across-fields, sort direction, pagination) against a real EF Core InMemory database |
-| `Dishes/` | Every Dish command/query handler, the `CreateDish` validator, and `DishesRepositories` |
-| `Users/` | Role assignment/unassignment against mocked `UserManager`/`RoleManager`, profile updates, and `UserContext`'s claims-to-DTO mapping |
-| `Middleware/` | `ErrorHandlingMiddleware` — asserts the actual HTTP status code and JSON body for each exception type, not just "it didn't throw" |
-| `Common/` | `PagedResult`'s pagination math |
+| Method | Route | Purpose / access |
+| --- | --- | --- |
+| GET | `/api/restaurant` | List/search restaurants; anonymous |
+| GET | `/api/restaurant/{id}` | Get restaurant; claim-based policy |
+| POST | `/api/restaurant` | Create restaurant; Owner role |
+| PATCH | `/api/restaurant/{id}` | Update restaurant; authenticated, ownership checked in application logic |
+| DELETE | `/api/restaurant/{id}` | Delete restaurant; authenticated, ownership checked in application logic |
+| GET | `/api/restaurants/{restaurantId}/dishes` | List dishes; minimum-age policy |
+| GET | `/api/restaurants/{restaurantId}/dishes/{dishId}` | Retrieve a dish; authenticated |
+| POST | `/api/restaurants/{restaurantId}/dishes` | Add a dish; authenticated |
+| DELETE | `/api/restaurants/{restaurantId}/dishes/{dishId}` | Delete a dish; authenticated |
+| PATCH | `/api/identity/user` | Update user profile; authenticated |
 
-Handlers are tested with mocked dependencies (NSubstitute) so they run in milliseconds; repository tests run against EF Core's InMemory provider so the actual LINQ-to-EF query logic (search filters, sorting, skip/take) is verified rather than assumed. `UserManager<T>`/`RoleManager<T>` are mocked directly (their public members are virtual) rather than wrapped in extra abstraction layers just to make them testable.
+ASP.NET Core Identity endpoints are also mapped under `/api/identity`; the controller provides Admin-only role assignment/unassignment operations.
 
-A handful of these tests are deliberately regression tests, written to fail against an earlier, buggier version of the handler and pass against the current one — e.g. confirming that deleting a dish only ever touches the dish, or that page size is honored end-to-end through the repository.
+## Testing
 
-## API overview
+```bash
+dotnet test DineReserve.slnx
+```
 
-| Method | Route | Notes |
-|---|---|---|
-| GET | `/api/restaurant` | Search/sort/paginate restaurants (anonymous) |
-| GET | `/api/restaurant/{id}` | Get one restaurant with its dishes |
-| POST | `/api/restaurant` | Create a restaurant (`Owner` role) |
-| PATCH | `/api/restaurant/{id}` | Update a restaurant (owner only) |
-| DELETE | `/api/restaurant/{id}` | Delete a restaurant (owner or Admin) |
-| GET | `/api/restaurants/{restaurantId}/dishes` | List dishes for a restaurant |
-| GET | `/api/restaurants/{restaurantId}/dishes/{dishId}` | Get a single dish |
-| POST | `/api/restaurants/{restaurantId}/dishes` | Add a dish |
-| DELETE | `/api/restaurants/{restaurantId}/dishes/{dishId}` | Delete a dish (owner or Admin) |
-| PATCH | `/api/identity/user` | Update the current user's profile |
-| POST/DELETE | `/api/identity` | Assign/unassign a role (Admin) |
+The test project includes tests for restaurant and dish handlers, validators, repository query behavior, authorization requirements, user context, and middleware.
 
-Full request/response contracts are documented in Swagger when running in Development.
+## Repository layout
 
-## Possible next steps
+```text
+DineReserve.API/
+DineReserve.Application/
+DineReserve.Domain/
+DineReserve.Infrastructure/
+DineReserve.Application.Tests/
+```
 
-- Add integration tests with `WebApplicationFactory` against a real (containerized) SQL Server
-- Add CORS configuration once a specific frontend origin is known
-- Add rate limiting and API versioning
-- Add a code coverage report to CI (coverlet is already wired into the test project)
+## Development notes
 
-## License
+The project remains a portfolio implementation. Before claiming production readiness, validate fresh-install setup, review authentication and authorization paths, ensure build/test CI is operational, audit package vulnerabilities, and add integration tests. No LICENSE file or active GitHub Actions workflow was found during the repository review, so neither is advertised here.
 
-MIT
+## Author
+
+**Paramveer Singh** · [GitHub](https://github.com/Paramveer-Singh-2000) · [LinkedIn](https://www.linkedin.com/in/paramveer-singh-8555b1184/)
